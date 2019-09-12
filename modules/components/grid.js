@@ -3,6 +3,9 @@ import { range } from "../utils/utils.js";
 import { EventBus } from "../utils/EventBus.js";
 
 const template = `
+    <button class="difficulty" id="rookie" value="1">Rookie</button>
+    <button class="difficulty" id="intermediate" value="2">Intermediate</button>
+    <button class="difficulty" id="expert" value="3">Expert</button>
     <style>
         .grid-container {
             width: 50%;
@@ -11,11 +14,12 @@ const template = `
             flex-wrap: wrap;
             justify-content: center;
             align-content: center;
+            background-color: grey;
         }
         .grid-cell {
             position: relative;
-            height: 50px;
-            width: 50px;
+            height: 150px;
+            width: 150px;
             margin: 8px;
             background-color: black;
         }
@@ -24,6 +28,16 @@ const template = `
 class GameGrid extends HTMLElement {
 
     // Handler attribute
+    static get observedAttributes() {
+        return ["difficulty"];
+    }
+    
+    get difficulty() {
+        return JSON.parse(this.getAttribute("difficulty").toLowerCase());
+    }
+    set difficulty(value) {
+        this.setAttribute("difficulty", value);
+    }
 
     get numberImages() {
         return parseInt(this.getAttribute("numberImages"), 10);
@@ -44,9 +58,10 @@ class GameGrid extends HTMLElement {
         super();
 
         this.attachShadow({ mode: "open" });
-        this.numberImages   = this.numberImages || 6;
+        this.numberImages   = this.numberImages || 3;
         this.repeatImages   = this.repeatImages || 2;
-        this.listImages     = getRandomListImages(this.numberImages);
+        this.listImages = getRandomListImages(this.numberImages);
+        this.difficulty = null;
         this.mapping = [];
         console.log(this.listImages);
         

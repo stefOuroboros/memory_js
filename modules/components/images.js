@@ -45,7 +45,6 @@ class GameImage extends HTMLElement {
         this.found = false;
         this.turned = false;
         this.path = null;
-
         this.addEventListener('click', event => {
             if (this.turned === false && this.found === false) {
                 this.turned = true;
