@@ -20,19 +20,19 @@ const template = `
 
 class GameImage extends HTMLElement {
 
-    static get observedAttribute() {
+    static get observedAttributes() {
         return ["turned"];
     }
 
     get found() {
-        return this.getAttribute("found").toLocaleLowerCase();
+        return JSON.parse(this.getAttribute("found").toLocaleLowerCase());
     }
     set found(value) {
         this.setAttribute("found", value);
     }
 
     get turned() {
-        return this.getAttribute("turned").toLocaleLowerCase();
+        return JSON.parse(this.getAttribute("turned").toLocaleLowerCase());
     }
     set turned(value) {
         this.setAttribute("turned", value);
@@ -40,19 +40,38 @@ class GameImage extends HTMLElement {
 
     constructor() {
         super();
-        this.root = this.attachShadow({mode: "open"});
+        this.root = this.attachShadow({ mode: "open" });
         //init image properties
-        this.found  = false;
+        this.found = false;
         this.turned = false;
-        this.path   = null;
-        EventBus.post('onCreateImageOnGrid', 'titi');
+        this.path = null;
+
+        this.addEventListener('click', event => {
+            if (this.turned === false && this.found === false) {
+                this.turned = true;
+                this.root.querySelector("root").style.backgroundImage = "url(imagesGame/" + this.path + ")";
+                EventBus.post("onTurnImage");
+            }
+        });
+        EventBus.post('onCreateImageOnGrid', this);
     }
+
     connectedCallback() {
         this.root.innerHTML = template;
     }
 
     attributeChangedCallback(attrName, oldVal, newVal) {
+
+        if (attrName === 'turned' && newVal === 'false') {
+            setTimeout(() => {
+                this.root.querySelector("root").style.backgroundImage = "url(./back.svg)";
+            }, 1000);
+        }
+
+        console.log("=======================");
         console.log(attrName, oldVal, newVal);
+        console.log("=======================");
+
     }
 }
 

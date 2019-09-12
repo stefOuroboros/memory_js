@@ -47,13 +47,18 @@ class GameGrid extends HTMLElement {
         this.numberImages   = this.numberImages || 6;
         this.repeatImages   = this.repeatImages || 2;
         this.listImages     = getRandomListImages(this.numberImages);
-        this.mapping        = [];
-
-        console.log(getRandomListImages(this.numberImages));
+        this.mapping = [];
+        console.log(this.listImages);
+        
 
         EventBus.subscribe('onCreateImageOnGrid', image => {
-            console.log(image);
+            this.mapping.push(this.initGridImagePath(image));
         });
+
+        EventBus.subscribe('onTurnImage', () => {
+            this.tryGridCombination(this.findGridImagesTurned());
+        });
+
     }
     connectedCallback() {
         const templateDyn = `
@@ -67,10 +72,53 @@ class GameGrid extends HTMLElement {
         this.shadowRoot.innerHTML = template + templateDyn;
     }
 
-    initGridImage() {
+    initGridImagePath(image) {
 
+        let countRepeat;
+        do {
+            countRepeat = 0;
+            image.path = this.listImages[Math.floor(Math.random() * this.listImages.length)];
+            this.mapping.forEach(element => {
+                if (element.path === image.path) {
+                    countRepeat++;
+                }
+            });
+        } while (countRepeat >= this.repeatImages);
+        return image;
+    }
+    findGridImagesTurned() {
+        return this.mapping.filter(image => image.turned === true && image.found === false); 
+    }
+    
+    findGridImagesFound() {
+        return this.mapping.filter(image => image.turned === true && image.found === true); 
     }
 
+    markFoundImage(turnedImages) {
+        turnedImages.map(image => image.found = true);
+    }
+    
+    
+    turnOffImage(turnedImages) {
+        turnedImages.map(image => image.turned = false);
+    }
+
+
+    tryGridCombination(turnedImages) {
+        console.log(turnedImages);
+        let countSimilar = turnedImages.reduce((accumulator, currentImage) => {
+            console.log('test reduce');
+            
+            return accumulator += turnedImages[0].path === currentImage.path ? 1 : 0; 
+        }, 0);
+        if (turnedImages.length === this.repeatImages && countSimilar === this.repeatImages) {
+            this.markFoundImage(turnedImages);
+        }
+        if (turnedImages.length === this.repeatImages && countSimilar !== this.repeatImages) {
+            this.turnOffImage(turnedImages);
+        } 
+        console.log(countSimilar);
+    }
 }
 
 customElements.define("game-grid", GameGrid);
