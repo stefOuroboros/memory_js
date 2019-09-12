@@ -74,7 +74,7 @@ export class EventBus {
         const eventCallbackPairIndex = this.findEventCallbacksPairIndex(event);
 
         if (eventCallbackPairIndex === -1) {
-            console.error("");
+            console.error("Not find subscribers for event '" + eventType + "'");
             return;
         }
 
